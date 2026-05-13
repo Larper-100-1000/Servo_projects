@@ -1,0 +1,21 @@
+#include <Servo.h>
+
+Servo servo;
+int posVal = 0;
+
+int potPin = A3;
+int potVal = 0;
+
+void setup() {
+  // put your setup code here, to run once:
+  servo.attach(9);
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+  potVal = analogRead(potPin);
+  posVal = (potVal/(1023/180));
+
+  servo.write(posVal);
+}
+
