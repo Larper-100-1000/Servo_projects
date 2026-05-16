@@ -1,21 +1,56 @@
+// I watched a video from Ditigal Town on youtube on how to use the millis function to control the speed of a servo https://www.youtube.com/watch?v=WABi7mj7LJU&t=347s
+
 #include <Servo.h>
 
 Servo servo;
-int posVal = 0;
 
-int potPin = A3;
-int potVal = 0;
+// Storing data servo
+unsigned int servoData[3]; // moveTo, currentPos, speed
+unsigned long servoMillis;
+
+unsigned long currentMillis;// Current boardtime in milliseconds
+
+int servoControl();
 
 void setup() {
-  // put your setup code here, to run once:
-  servo.attach(9);
+  Serial.begin(9600);
+  Serial.println("MillisServo");
+  servo.attach(9);  // attaches the servo on pin 9 to the Servo object
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  potVal = analogRead(potPin);
-  posVal = (potVal/(1023/180));
+  int servoFinished;
+  currentMillis = millis();
 
-  servo.write(posVal);
+  servoFinished = servoControl(); // controls servo
+
+  if(servoFinished < 1){
+    servoData[0] = random(179);
+    servoData[2] = random(1,100);
+    Serial.print("Servo next pos: ");
+    Serial.print(servoData[0]);
+    Serial.print("Servo next speed: ");
+    Serial.print(servoData[2]);
+  }
 }
-
+  int servoControl(){
+    int returnPos;
+    returnPos = 0; // returns 0 if destination reached
+    if(servoData[0] > 179){
+      servoData[0] = 179; // Limit check
+    }
+    if(servoData[0] != servoData[1]){ // Checks if needed to be moved if equal no more movement needed
+      if(currentMillis - servoMillis >= servoData[2]){ // is it time to move
+        servoMillis = currentMillis;
+        if(servoData[0] > servoData[1]){
+          servoData[1]++;
+        }
+        else{
+          servoData[1]--; 
+        }
+        servo.write(servoData[1]);
+      }
+      returnPos = 1;
+    }
+    return returnPos;
+  }
