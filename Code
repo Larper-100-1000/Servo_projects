@@ -7,6 +7,7 @@ Servo servo;
 // Storing data servo
 unsigned int servoData[3]; // moveTo, currentPos, speed
 unsigned long servoMillis;
+int timeSweep = 3000; // amount of milliseconds for one sweep
 
 unsigned long currentMillis;// Current boardtime in milliseconds
 
@@ -16,6 +17,7 @@ void setup() {
   Serial.begin(9600);
   Serial.println("MillisServo");
   servo.attach(9);  // attaches the servo on pin 9 to the Servo object
+  servoData[1] = 0;
 }
 
 void loop() {
@@ -25,13 +27,18 @@ void loop() {
   servoFinished = servoControl(); // controls servo
 
   if(servoFinished < 1){
-    servoData[0] = random(179);
-    servoData[2] = random(1,100);
+    if(servoData[0] > 0){ // checks if the pos is above zero then go back to zero if zero go back to max
+      servoData[0] = 0;
+    } else {
+      servoData[0] = 179;
+    }
+    servoData[2] = timeSweep / 179;
     Serial.print("Servo next pos: ");
     Serial.print(servoData[0]);
     Serial.print("Servo next speed: ");
     Serial.print(servoData[2]);
   }
+  
 }
   int servoControl(){
     int returnPos;
@@ -41,7 +48,7 @@ void loop() {
     }
     if(servoData[0] != servoData[1]){ // Checks if needed to be moved if equal no more movement needed
       if(currentMillis - servoMillis >= servoData[2]){ // is it time to move
-        servoMillis = currentMillis;
+        servoMillis = currentMillis; // the last time servo moved step
         if(servoData[0] > servoData[1]){
           servoData[1]++;
         }
